@@ -1,0 +1,16 @@
+[project]
+name = "notification-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.18.5",
+    "axiom",
+    "bcrypt>=5.0.0",
+    "fastapi[standard]>=0.138.2",
+    "pydantic[email,timezone]>=2.13.4",
+]
+
+[tool.uv.sources]
+axiom = { git = "https://github.com/karyonhq/axiom.git" }
