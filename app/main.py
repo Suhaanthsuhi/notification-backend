@@ -81,7 +81,7 @@ app.add_middleware(
 
 app.add_middleware(
     AuthMiddleware,
-    jwt_secret=jwt_service,
+    jwt_service=jwt_service,
     required=False,
     blacklist=_blacklist,
     rate_limiter=_rate_limiter,
