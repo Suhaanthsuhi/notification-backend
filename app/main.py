@@ -12,6 +12,7 @@ from app.core.middleware import RequestIDMiddleware
 from app.core.logger import configure_logging, get_logger
 from app.core.db import engine
 from app.dependencies.auth import jwt_service, _blacklist
+import app.models
 
 from axiom.db.base import BaseSchema
 from axiom.auth.middleware import AuthMiddleware
@@ -34,7 +35,7 @@ if redis_client and settings.env.lower() != "test":
     _rate_limiter = RateLimiter(redis_client, max_requests=100, window_seconds=60)
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     configure_logging()
 
     # Tables are auto-created on every startup. create_all creates MISSING tables
@@ -42,13 +43,17 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # free (just add the model and restart), while ALTERing an existing table
     # (e.g. a new column on a populated table) is handled by an Alembic migration.
     # See README → Schema Migrations.
+    print("DEBUG: db_supports_schema is", settings.db_supports_schema)
+    print("DEBUG: db_schema is", settings.db_schema)
     async with engine.connect() as conn:
         async with conn.begin():
+            print("DEBUG: creating tables...")
             if settings.db_supports_schema and settings.db_schema:
                 await conn.execute(
                     sa.text(f'CREATE SCHEMA IF NOT EXISTS "{settings.db_schema}"')
                 )
             await conn.run_sync(BaseSchema.metadata.create_all)
+    print("DEBUG: tables created.")
 
     yield
 
@@ -58,7 +63,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title=settings.service_name, 
-    version="0.1.0"
+    version="0.1.0",
+    lifespan=lifespan,
 )
 
 @app.middleware("http")

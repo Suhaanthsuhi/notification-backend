@@ -62,7 +62,8 @@ class Settings(BaseSettings):
 
     @property
     def db_schema(self):
-        sch = self.service_name.replace("-", "_")
+        sch = self.service_name.lower().replace("-", "_")
+        print("DEBUG: db_schema is", sch)
         return sch
 
     @computed_field
@@ -85,6 +86,4 @@ class Settings(BaseSettings):
 def get_settings():
     return Settings()
 
-settings = get_settings()
-
-__all__ = ["settings", "get_settings"]
+__all__ = ["get_settings"]
